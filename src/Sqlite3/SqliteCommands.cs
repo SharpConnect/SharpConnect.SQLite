@@ -82,6 +82,12 @@ namespace SQLite
             _bindings = new List<Binding>();
             CommandText = "";
         }
+        public SQLiteCommand(string sqlCmd, SQLiteConnection conn)
+        {
+            _conn = conn;
+            _bindings = new List<Binding>();
+            CommandText = sqlCmd;
+        }
         public int ExecuteNonQuery()
         {
             if (_conn.Trace)
@@ -340,7 +346,7 @@ namespace SQLite
             public int Index { get; set; }
         }
 
-       
+
     }
 
 
@@ -364,7 +370,12 @@ namespace SQLite
         {
             Connection = conn;
         }
+        public PreparedSqlLiteInsertCommand(string sqlCmd, SQLiteConnection conn)
+        {
+            this.CommandText = sqlCmd;
+            Connection = conn;
 
+        }
         public int ExecuteNonQuery(object[] source)
         {
             if (Connection.Trace)
