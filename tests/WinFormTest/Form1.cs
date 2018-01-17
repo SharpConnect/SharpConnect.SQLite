@@ -47,10 +47,12 @@ namespace WinFormTest
 
                 SQLiteCommand select = new SQLiteCommand(db);
                 select.CommandText = sql;
-                foreach (var row in select.ExecuteDeferredQuery())
+                SQLiteDataReader reader = select.ExecuteReader();
+                while (reader.Read())
                 {
 
                 }
+                reader.Close();
             }
         }
 
@@ -81,16 +83,14 @@ namespace WinFormTest
                 string sql = "select * from blobTest";
                 SQLiteCommand select = new SQLiteCommand(db);
                 select.CommandText = sql;
-                foreach (var row in select.ExecuteDeferredQuery())
+                SQLiteDataReader reader = select.ExecuteReader();
+                while (reader.Read())
                 {
-                    object[] cells = (object[])row;
-                    if (cells != null && cells.Length > 0)
-                    {
-                        byte[] data = (byte[])cells[0];
-                        //save 
-                        System.IO.File.WriteAllBytes("d:\\WImageTest\\mydata1.png", data);
-                    }
+                    byte[] data = reader.GetByteArray(0);
+                    //save 
+                    System.IO.File.WriteAllBytes("d:\\WImageTest\\mydata1.png", data);
                 }
+                reader.Close(); 
             }
         }
     }

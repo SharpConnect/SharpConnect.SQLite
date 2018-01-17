@@ -678,31 +678,31 @@ namespace SQLite
             return r;
         }
 
-        public T ExecuteScalar<T>(string query, params object[] args)
-        {
-            var cmd = CreateCommand(query, args);
+        //public T ExecuteScalar<T>(string query, params object[] args)
+        //{
+        //    var cmd = CreateCommand(query, args);
 
-            if (TimeExecution)
-            {
-                if (_sw == null)
-                {
-                    _sw = new Stopwatch();
-                }
-                _sw.Reset();
-                _sw.Start();
-            }
+        //    if (TimeExecution)
+        //    {
+        //        if (_sw == null)
+        //        {
+        //            _sw = new Stopwatch();
+        //        }
+        //        _sw.Reset();
+        //        _sw.Start();
+        //    }
 
-            var r = cmd.ExecuteScalar<T>();
+        //    var r = cmd.ExecuteScalar<T>();
 
-            if (TimeExecution)
-            {
-                _sw.Stop();
-                _elapsedMilliseconds += _sw.ElapsedMilliseconds;
-                Debug.WriteLine(string.Format("Finished in {0} ms ({1:0.0} s total)", _sw.ElapsedMilliseconds, _elapsedMilliseconds / 1000.0));
-            }
+        //    if (TimeExecution)
+        //    {
+        //        _sw.Stop();
+        //        _elapsedMilliseconds += _sw.ElapsedMilliseconds;
+        //        Debug.WriteLine(string.Format("Finished in {0} ms ({1:0.0} s total)", _sw.ElapsedMilliseconds, _elapsedMilliseconds / 1000.0));
+        //    }
 
-            return r;
-        }
+        //    return r;
+        //}
 
         /// <summary>
         /// Creates a SQLiteCommand given the command text (SQL) with arguments. Place a '?'

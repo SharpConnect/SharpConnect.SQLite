@@ -69,20 +69,19 @@ using Sqlite3Statement = System.IntPtr;
 
 namespace SQLite
 {
+
+
     public partial class SQLiteCommand
     {
         SQLiteConnection _conn;
         private List<Binding> _bindings;
-
         public string CommandText { get; set; }
-
         public SQLiteCommand(SQLiteConnection conn)
         {
             _conn = conn;
             _bindings = new List<Binding>();
             CommandText = "";
         }
-
         public int ExecuteNonQuery()
         {
             if (_conn.Trace)
@@ -115,117 +114,89 @@ namespace SQLite
             throw SQLiteException.New(r, r.ToString());
         }
 
-        //public IEnumerable<T> ExecuteDeferredQuery<T>()
-        //{
-        //    return ExecuteDeferredQuery<T>(_conn.GetMapping(typeof(T)));
-        //}
-
-        //public List<T> ExecuteQuery<T>()
-        //{
-        //    return ExecuteDeferredQuery<T>(_conn.GetMapping(typeof(T))).ToList();
-        //}
-
-        //public List<T> ExecuteQuery<T>(TableMapping map)
-        //{
-        //    return ExecuteDeferredQuery<T>(map).ToList();
-        //}
-
-        ///// <summary>
-        ///// Invoked every time an instance is loaded from the database.
-        ///// </summary>
-        ///// <param name='obj'>
-        ///// The newly created object.
-        ///// </param>
-        ///// <remarks>
-        ///// This can be overridden in combination with the <see cref="SQLiteConnection.NewCommand"/>
-        ///// method to hook into the life-cycle of objects.
-        /////
-        ///// Type safety is not possible because MonoTouch does not support virtual generic methods.
-        ///// </remarks>
-        //protected virtual void OnInstanceCreated(object obj)
-        //{
-        //    // Can be overridden.
-        //}
-
-        public IEnumerable<object> ExecuteDeferredQuery()
+        public SQLiteDataReader ExecuteReader()
         {
-            if (_conn.Trace)
-            {
-                Debug.WriteLine("Executing Query: " + this);
-            }
-
-            var stmt = Prepare();
-            try
-            {
-
-                int colCount = SQLite3.ColumnCount(stmt);
-
-                //for (int i = 0; i < cols.Length; i++)
-                //{
-                //    var name = SQLite3.ColumnName16(stmt, i);
-                //    cols[i] = map.FindColumn(name);
-                //}
-                object[] reusableRow = new object[colCount];
-
-                while (SQLite3.Step(stmt) == SQLite3.Result.Row)
-                {
-                    //var obj = Activator.CreateInstance(map.MappedType);
-                    for (int i = 0; i < colCount; i++)
-                    {
-                        //if (cols[i] == null)
-                        //    continue;
-                        SQLite3.ColType colType = SQLite3.ColumnType(stmt, i);
-
-                        //read column as specific
-                        //***
-                        var val = ReadCol(stmt, i, colType, typeof(byte[]));
-                        reusableRow[i] = val;
-                        //cols[i].SetValue(obj, val);
-                    }
-                    //OnInstanceCreated(obj);
-                    yield return reusableRow;
-                }
-            }
-            finally
-            {
-                SQLite3.Finalize(stmt);
-            }
+            return new SQLiteDataReader(_conn, Prepare());
         }
+        //public IEnumerable<object> ExecuteDeferredQuery()
+        //{
+        //    if (_conn.Trace)
+        //    {
+        //        Debug.WriteLine("Executing Query: " + this);
+        //    }
 
-        public T ExecuteScalar<T>()
-        {
-            if (_conn.Trace)
-            {
-                Debug.WriteLine("Executing Query: " + this);
-            }
+        //    var stmt = Prepare();
+        //    try
+        //    {
 
-            T val = default(T);
+        //        int colCount = SQLite3.ColumnCount(stmt);
 
-            var stmt = Prepare();
+        //        //for (int i = 0; i < cols.Length; i++)
+        //        //{
+        //        //    var name = SQLite3.ColumnName16(stmt, i);
+        //        //    cols[i] = map.FindColumn(name);
+        //        //}
+        //        object[] reusableRow = new object[colCount];
 
-            try
-            {
-                var r = SQLite3.Step(stmt);
-                if (r == SQLite3.Result.Row)
-                {
-                    var colType = SQLite3.ColumnType(stmt, 0);
-                    val = (T)ReadCol(stmt, 0, colType, typeof(T));
-                }
-                else if (r == SQLite3.Result.Done)
-                {
-                }
-                else
-                {
-                    throw SQLiteException.New(r, SQLite3.GetErrmsg(_conn.Handle));
-                }
-            }
-            finally
-            {
-                Finalize(stmt);
-            }
+        //        while (SQLite3.Step(stmt) == SQLite3.Result.Row)
+        //        {
+        //            //var obj = Activator.CreateInstance(map.MappedType);
+        //            for (int i = 0; i < colCount; i++)
+        //            {
+        //                //if (cols[i] == null)
+        //                //    continue;
+        //                SQLite3.ColType colType = SQLite3.ColumnType(stmt, i);
 
-            return val;
-        }
+        //                //read column as specific
+        //                //***
+        //                var val = ReadCol(stmt, i, colType, typeof(byte[]));
+        //                reusableRow[i] = val;
+        //                //cols[i].SetValue(obj, val);
+        //            }
+        //            //OnInstanceCreated(obj);
+        //            yield return reusableRow;
+        //        }
+        //    }
+        //    finally
+        //    {
+        //        SQLite3.Finalize(stmt);
+        //    }
+        //}
+
+        //public T ExecuteScalar<T>()
+        //{
+        //    if (_conn.Trace)
+        //    {
+        //        Debug.WriteLine("Executing Query: " + this);
+        //    }
+
+        //    T val = default(T);
+
+        //    var stmt = Prepare();
+
+        //    try
+        //    {
+        //        var r = SQLite3.Step(stmt);
+        //        if (r == SQLite3.Result.Row)
+        //        {
+        //            var colType = SQLite3.ColumnType(stmt, 0);
+        //            val = (T)ReadCol(stmt, 0, colType, typeof(T));
+        //        }
+        //        else if (r == SQLite3.Result.Done)
+        //        {
+        //        }
+        //        else
+        //        {
+        //            throw SQLiteException.New(r, SQLite3.GetErrmsg(_conn.Handle));
+        //        }
+        //    }
+        //    finally
+        //    {
+        //        Finalize(stmt);
+        //    }
+
+        //    return val;
+        //}
 
         public void Bind(string name, object val)
         {
@@ -369,105 +340,7 @@ namespace SQLite
             public int Index { get; set; }
         }
 
-        object ReadCol(Sqlite3Statement stmt, int index, SQLite3.ColType type, Type clrType)
-        {
-            if (type == SQLite3.ColType.Null)
-            {
-                return null;
-            }
-            else
-            {
-                if (clrType == typeof(String))
-                {
-                    return SQLite3.ColumnString(stmt, index);
-                }
-                else if (clrType == typeof(Int32))
-                {
-                    return (int)SQLite3.ColumnInt(stmt, index);
-                }
-                else if (clrType == typeof(Boolean))
-                {
-                    return SQLite3.ColumnInt(stmt, index) == 1;
-                }
-                else if (clrType == typeof(double))
-                {
-                    return SQLite3.ColumnDouble(stmt, index);
-                }
-                else if (clrType == typeof(float))
-                {
-                    return (float)SQLite3.ColumnDouble(stmt, index);
-                }
-                else if (clrType == typeof(TimeSpan))
-                {
-                    return new TimeSpan(SQLite3.ColumnInt64(stmt, index));
-                }
-                else if (clrType == typeof(DateTime))
-                {
-                    if (_conn.StoreDateTimeAsTicks)
-                    {
-                        return new DateTime(SQLite3.ColumnInt64(stmt, index));
-                    }
-                    else
-                    {
-                        var text = SQLite3.ColumnString(stmt, index);
-                        return DateTime.Parse(text);
-                    }
-                }
-                else if (clrType == typeof(DateTimeOffset))
-                {
-                    return new DateTimeOffset(SQLite3.ColumnInt64(stmt, index), TimeSpan.Zero);
-#if !USE_NEW_REFLECTION_API
-                }
-                else if (clrType.IsEnum)
-                {
-#else
-				} else if (clrType.GetTypeInfo().IsEnum) {
-#endif
-                    return SQLite3.ColumnInt(stmt, index);
-                }
-                else if (clrType == typeof(Int64))
-                {
-                    return SQLite3.ColumnInt64(stmt, index);
-                }
-                else if (clrType == typeof(UInt32))
-                {
-                    return (uint)SQLite3.ColumnInt64(stmt, index);
-                }
-                else if (clrType == typeof(decimal))
-                {
-                    return (decimal)SQLite3.ColumnDouble(stmt, index);
-                }
-                else if (clrType == typeof(Byte))
-                {
-                    return (byte)SQLite3.ColumnInt(stmt, index);
-                }
-                else if (clrType == typeof(UInt16))
-                {
-                    return (ushort)SQLite3.ColumnInt(stmt, index);
-                }
-                else if (clrType == typeof(Int16))
-                {
-                    return (short)SQLite3.ColumnInt(stmt, index);
-                }
-                else if (clrType == typeof(sbyte))
-                {
-                    return (sbyte)SQLite3.ColumnInt(stmt, index);
-                }
-                else if (clrType == typeof(byte[]))
-                {
-                    return SQLite3.ColumnByteArray(stmt, index);
-                }
-                else if (clrType == typeof(Guid))
-                {
-                    var text = SQLite3.ColumnString(stmt, index);
-                    return new Guid(text);
-                }
-                else
-                {
-                    throw new NotSupportedException("Don't know how to read " + clrType);
-                }
-            }
-        }
+       
     }
 
 
@@ -580,4 +453,147 @@ namespace SQLite
         }
     }
 
+
+    public class SQLiteDataReader : IDisposable
+    {
+        Sqlite3DatabaseHandle stmt;
+        int colCount;
+        SQLite3.ColType[] colTypes;
+        string[] colNames;
+        SQLiteConnection _conn;
+
+        bool _isClosed;
+        internal SQLiteDataReader(SQLiteConnection conn, Sqlite3DatabaseHandle stmt)
+        {
+            this._conn = conn;
+            this.stmt = stmt;
+            colCount = SQLite3.ColumnCount(stmt);
+            colTypes = new SQLite3.ColType[colCount];
+            colNames = new string[colCount];
+
+            for (int i = 0; i < colCount; i++)
+            {
+                colTypes[i] = SQLite3.ColumnType(stmt, i);
+                colNames[i] = SQLite3.ColumnName16(stmt, i);
+            }
+
+            //while (SQLite3.Step(stmt) == SQLite3.Result.Row)
+            //{
+            //    //var obj = Activator.CreateInstance(map.MappedType);
+            //    for (int i = 0; i < colCount; i++)
+            //    {
+            //        //if (cols[i] == null)
+            //        //    continue;
+            //        //SQLite3.ColType colType = SQLite3.ColumnType(stmt, i);
+            //        //read column as specific
+            //        //***
+            //        var val = ReadCol(stmt, i, colType, typeof(byte[]));
+            //        reusableRow[i] = val;
+            //        //cols[i].SetValue(obj, val);
+            //    }
+            //    //OnInstanceCreated(obj);
+            //    yield return reusableRow;
+            //}
+        }
+
+        public void Dispose()
+        {
+            if (!_isClosed)
+            {
+                Close();
+                _isClosed = true;
+            }
+
+        }
+        public void Close()
+        {
+            SQLite3.Finalize(stmt);
+        }
+
+        public bool Read()
+        {
+            return SQLite3.Step(stmt) == SQLite3.Result.Row;
+        }
+        public string GetString(int index)
+        {
+            //get data as string
+            return SQLite3.ColumnString(stmt, index);
+        }
+        public int GetInt32(int index)
+        {
+            //get data as string
+            return (int)SQLite3.ColumnInt(stmt, index);
+        }
+        public bool GetBool(int index)
+        {
+            return SQLite3.ColumnInt(stmt, index) == 1;
+        }
+        public double GetDouble(int index)
+        {
+            return SQLite3.ColumnDouble(stmt, index);
+        }
+        public float GetFloat(int index)
+        {
+            return (float)SQLite3.ColumnDouble(stmt, index);
+        }
+        public TimeSpan GetTimeSpan(int index)
+        {
+            return new TimeSpan(SQLite3.ColumnInt64(stmt, index));
+        }
+
+        public DateTime GetDateTime(int index)
+        {
+            if (_conn.StoreDateTimeAsTicks)
+            {
+                return new DateTime(SQLite3.ColumnInt64(stmt, index));
+            }
+            else
+            {
+                var text = SQLite3.ColumnString(stmt, index);
+                return DateTime.Parse(text);
+            }
+        }
+        public DateTimeOffset GetDateTimeOffset(int index)
+        {
+            return new DateTimeOffset(SQLite3.ColumnInt64(stmt, index), TimeSpan.Zero);
+        }
+        public Int64 GetInt64(int index)
+        {
+            return SQLite3.ColumnInt64(stmt, index);
+        }
+        public UInt32 GetUInt32(int index)
+        {
+            return (uint)SQLite3.ColumnInt64(stmt, index);
+        }
+        public decimal GetDecimal(int index)
+        {
+            //????
+            return (decimal)SQLite3.ColumnDouble(stmt, index);
+        }
+        public byte GetByte(int index)
+        {
+            return (byte)SQLite3.ColumnInt(stmt, index);
+        }
+        public UInt16 GetUInt16(int index)
+        {
+            return (ushort)SQLite3.ColumnInt(stmt, index);
+        }
+        public Int16 GetInt16(int index)
+        {
+            return (short)SQLite3.ColumnInt(stmt, index);
+        }
+        public sbyte GetSByte(int index)
+        {
+            return (sbyte)SQLite3.ColumnInt(stmt, index);
+        }
+        public byte[] GetByteArray(int index)
+        {
+            return SQLite3.ColumnByteArray(stmt, index);
+        }
+        public Guid GetGuid(int index)
+        {
+            return new Guid(SQLite3.ColumnString(stmt, index));
+        }
+
+    }
 }
