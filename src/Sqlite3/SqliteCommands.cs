@@ -398,14 +398,16 @@ namespace SQLite
                 }
             }
 
-            var r = SQLite3.Step(Statement);
+            SQLite3.Result r = SQLite3.Step(Statement);
 
             switch (r)
             {
                 case SQLite3.Result.Done:
-                    int rowsAffected = SQLite3.Changes(Connection.Handle);
-                    SQLite3.Reset(Statement);
-                    return rowsAffected;
+                    {
+                        int rowsAffected = SQLite3.Changes(Connection.Handle);
+                        SQLite3.Reset(Statement);
+                        return rowsAffected;
+                    }
                 case SQLite3.Result.Error:
                     {
                         string msg = SQLite3.GetErrmsg(Connection.Handle);
