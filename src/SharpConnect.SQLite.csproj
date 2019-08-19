@@ -33,6 +33,11 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Dotnet2\CompilerServices.cs" />
+    <Compile Include="Extensions\MySqlStringToHexUtils.cs" />
+    <Compile Include="Extensions\MyStructData.cs" />
+    <Compile Include="Extensions\SqLite3Extensions.cs" />
+    <Compile Include="Extensions\SqlStringTemplate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sqlite3\Exception.cs" />
     <Compile Include="Sqlite3\Sqlite3.cs" />

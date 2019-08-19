@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 
 using SQLite;
+using SQLite.Extensions;
 
 namespace WinFormTest
 {
@@ -29,18 +30,28 @@ namespace WinFormTest
                 string create_table = "create table if not exists \"test001\" (a int,b varchar(255))";
                 conn.Execute(create_table);
 
+                SqlStringTemplate sqlStringTemplate = new SqlStringTemplate("insert into test001(a,b) values(?a,?b)");
+                string sqlcmd = sqlStringTemplate.BindValues(null, true);
+
                 PreparedSqlLiteInsertCommand insertCmd = new PreparedSqlLiteInsertCommand(
-                    "insert into test001(a,b) values(?,?)",
+                    sqlcmd,
                     conn);
+
                 //insert orderline
-                conn.Execute("BEGIN TRANSACTION"); //faster performance with begin and end transaction
+                //faster performance with begin and end transaction
+                conn.ExecBeginTransaction();
+
+                CommandParams pars = new CommandParams();
                 for (int i = 0; i < 10; ++i)
                 {
-                    insertCmd.ExecuteNonQuery(new object[] { 1, "x" });
+                    pars.AddWithValue("?a", 1);
+                    pars.AddWithValue("?b", "x");
+                    insertCmd.ExecuteNonQuery(sqlStringTemplate, pars);
+                    pars.Clear();
                 }
                 insertCmd.Dispose();
+                conn.ExecEndTransaction();
 
-                conn.Execute("END TRANSACTION");
             }
             //---------
             //open db and select 
@@ -68,14 +79,15 @@ namespace WinFormTest
                 PreparedSqlLiteInsertCommand insertCmd = new PreparedSqlLiteInsertCommand(conn);
                 insertCmd.CommandText = "insert into blobTest(a) values(?)";
                 //insert orderline
-                conn.Execute("BEGIN TRANSACTION"); //faster performance with begin and end transaction
+                //faster performance with begin and end transaction
+                conn.ExecBeginTransaction();
                 for (int i = 0; i < 10; ++i)
                 {
                     byte[] files = System.IO.File.ReadAllBytes("d:\\WImageTest\\01.png");
                     insertCmd.ExecuteNonQuery(new object[] { files });
                 }
                 insertCmd.Dispose();
-                conn.Execute("END TRANSACTION");
+                conn.ExecEndTransaction();
             }
             //---------
             //open db and select 

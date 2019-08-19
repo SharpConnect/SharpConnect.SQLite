@@ -122,7 +122,7 @@ namespace SQLite
     /// <summary>
     /// Represents an open connection to a SQLite database.
     /// </summary>
-    public partial class SQLiteConnection : IDisposable
+    public class SQLiteConnection : IDisposable
     {
         private bool _open;
         private TimeSpan _busyTimeout;
@@ -626,7 +626,7 @@ namespace SQLite
             if (!_open)
                 throw SQLiteException.New(SQLite3.Result.Error, "Cannot create commands from unopened database");
 
-            var cmd = NewCommand();
+            SQLiteCommand cmd = NewCommand();
             cmd.CommandText = cmdText;
             foreach (var o in ps)
             {
@@ -654,7 +654,8 @@ namespace SQLite
         /// </returns>
         public int Execute(string query, params object[] args)
         {
-            var cmd = CreateCommand(query, args);
+
+            SQLiteCommand cmd = CreateCommand(query, args);
 
             if (TimeExecution)
             {
@@ -666,7 +667,7 @@ namespace SQLite
                 _sw.Start();
             }
 
-            var r = cmd.ExecuteNonQuery();
+            int r = cmd.ExecuteNonQuery();
 
             if (TimeExecution)
             {
@@ -1130,7 +1131,7 @@ namespace SQLite
                 Execute("commit");
             }
             // Do nothing on a commit with no open transaction
-        } 
+        }
         ~SQLiteConnection()
         {
             Dispose(false);
